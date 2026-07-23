@@ -1,55 +1,63 @@
+from collections.abc import Callable
+from typing import Any
+
 from psychopy import monitors, visual, core
 from psychopy.hardware import keyboard
-
-
-WINDOW_SIZE = (800, 600)
-MONITOR = monitors.Monitor("MacBook Air 13.6 inch", width=30.41, distance=60)
-MONITOR.setSizePix([2560, 1664])
 
 
 class Base:
 
     QUIT_KEY = "q"
 
-    def __init__(self):
+    def __init__(self, monitor: None | monitors.Monitor = None,
+        window_size: tuple[int, int] = (800, 600),
+        window_color: tuple[int, int, int] =(-1, -1, -1)
+    ):
         self.win = visual.Window(
-            monitor=MONITOR,
-            size=WINDOW_SIZE,
-            color=(-1, -1, -1)
+            monitor=monitor,
+            size=window_size,
+            color=window_color
         )
+        self.frame_rate = self.win.getActualFrameRate() or 60.0
         self.kb = keyboard.Keyboard()
         self.text_center = visual.TextStim(self.win, "", color=(1, 1, 1))
-        self.abort_requested = False
+        self.abort_requested: bool = False
 
-    def present(self, text):
+    def present(self, text: str, callOnFlip: None | Callable = None):
         self.text_center.text = text
         self.text_center.draw()
+        if callOnFlip:
+            self.win.callOnFlip(callOnFlip)
         self.win.flip()
 
-    def wait(self, dur):
-        timer = core.Clock()
-        while timer.getTime() < dur:
+    def present_for(self, text: str, dur: float):
+        n_frames = int(round(dur * self.frame_rate))
+        self.text_center.text = text
+        for _ in range(n_frames):
+            self.text_center.draw()
+            self.win.flip()
             self.check_quit()
-            core.wait(0.001)
 
     def check_quit(self):
         if self.kb.getKeys([self.QUIT_KEY], waitRelease=False):
             self.abort_requested = True
+            # NOTE: this does not immediately abort,
+            # check abort_requested in run() function
+            # in order not to abort during a trial
 
-    def fixation(self, dur, cross="+"):
-        self.present(cross)
-        self.wait(dur)
+    def fixation(self, dur: float, cross: str = "+"):
+        self.present_for(cross, dur)
 
-    def show_stimulus(self, stimulus, dur):
-        self.present(stimulus)
-        self.wait(dur)
+    def show_stimulus(self, stimulus: str, dur: float):
+        self.present_for(stimulus, dur)
 
-    def delay(self, dur):
-        self.win.flip()
-        self.wait(dur)
+    def delay(self, dur: float):
+        self.present_for("", dur)
     
     def waiting_start(self):
         self.kb.clearEvents()
         self.present("Press SPACE to start")
         self.kb.waitKeys(keyList=["space"], waitRelease=False)[0]
-    
+
+    def run(self, *args, **kwargs) -> Any:
+        raise NotImplementedError()

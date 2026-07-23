@@ -5,8 +5,13 @@ Sternberg, S. (1966). High-speed scanning in human memory. Science, 153(3736), 6
 """
 
 import random
+import traceback
+from typing import Final, Literal
 from dataclasses import dataclass
-from typing import Literal
+import csv
+import os
+from datetime import datetime
+
 from psychopy import monitors, visual, core
 from psychopy.hardware import keyboard
 
@@ -14,17 +19,18 @@ from src.experiment import Base
 
 
 DIGITS = list("0123456789")
+Response = Literal["j", "f"]
 
 class Experiment(Base):
 
     MIN_SET_SIZE = 1
     MAX_SET_SIZE = 6
-    YES = "j"
-    NO  = "f"
+    YES: Final[Response] = "j"
+    NO: Final[Response] = "f"
 
-    def __init__(self, particiant_id):
-        super().__init__()
-        self.participant_id = particiant_id
+    def __init__(self, participant_id: str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.participant_id = participant_id
 
     def generate_trial(self, set_size: None | int = None):
         """generate a single trial with random set size if not specified"""
@@ -50,16 +56,16 @@ class Experiment(Base):
 
         return Trial(
             set_size=set_size,
-            memory_set=positives,
+            memory_set="".join(positives),
             probe=probe,
             correct_response=correct_response
         )
     
-    def generate_trials(self, n):
+    def generate_trials(self, n: int):
         """generate n many trials where each set size has equal trials if possible"""
 
         # generate for each length
-        trials = []
+        trials: list[Trial] = []
         if n >= self.MAX_SET_SIZE:
             m = n//self.MAX_SET_SIZE
             for i in range(self.MIN_SET_SIZE, self.MAX_SET_SIZE+1):
@@ -76,11 +82,8 @@ class Experiment(Base):
         random.shuffle(trials)
         return trials
     
-    def probe(self, probe):
-        self.text_center.text = probe
-        self.text_center.draw()
-        self.win.callOnFlip(self.kb.clock.reset)
-        self.win.flip()
+    def show_probe(self, probe: str):
+        self.present(probe, self.kb.clock.reset)
 
         while True:
             key = self.kb.waitKeys(keyList=[self.YES, self.NO, self.QUIT_KEY], waitRelease=False)[0]
@@ -91,9 +94,9 @@ class Experiment(Base):
 
     def run_trial(self, trial: "Trial"):
         self.fixation(dur=1.0)
-        self.show_stimulus("".join(trial.memory_set), dur=1.2)
+        self.show_stimulus(trial.memory_set, dur=1.2)
         self.delay(dur=2.0)
-        key = self.probe(trial.probe)
+        key = self.show_probe(trial.probe)
         is_correct = trial.correct_response == key.name
         if is_correct:
             self.show_stimulus("Correct", dur=0.5)
@@ -105,7 +108,7 @@ class Experiment(Base):
             response_time=key.rt
         )
 
-    def run(self, n):
+    def run(self, n: int):
         self.results = []
         try:
             self.trials = self.generate_trials(n)
@@ -117,36 +120,41 @@ class Experiment(Base):
                 self.check_quit()
                 if self.abort_requested:
                     break
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
         finally:
             self.win.close()
 
-    def save_csv(self, filename):
+    def save_csv(self, filename: str):
+        # TODO: rewrite function in Base class
+        write_header = not os.path.exists(filename)
         with open(filename, "a+") as f:
-            for result in self.results:
-                f.write((f"{self.participant_id}, "
-                    f"{result.trial.set_size}, "
-                    f"{''.join(result.trial.memory_set)}, "
-                    f"{result.trial.probe}, "
-                    f"{result.trial.correct_response}, "
-                    f"{result.response}, "
-                    f"{result.response_time}\n"
-                ))
+            writer = csv.writer(f)
+            if write_header:
+                writer.writerow([
+                    "participant_id", "trial_number", "set_size", "memory_set",
+                    "probe", "correct_response", "response", "response_time", "is_correct"
+                ])
+            for i, result in enumerate(self.results, start=1):
+                writer.writerow([
+                    self.participant_id, i, result.trial.set_size, result.trial.memory_set,
+                    result.trial.probe, result.trial.correct_response,
+                    result.response, round(result.response_time, 3), result.is_correct
+                ])
 
 
 @dataclass
 class Trial:
     set_size:   int
-    memory_set: list[str]
+    memory_set: str
     probe:      str
-    correct_response: Literal[Experiment.YES] | Literal[Experiment.NO]
+    correct_response: Response
 
 
 @dataclass
 class TrialResult:
-    trial: None | Trial
-    response: str
+    trial: Trial
+    response: Response
     response_time: float
 
     @property
@@ -155,7 +163,11 @@ class TrialResult:
 
 
 if __name__ == "__main__":
-    experiment = Experiment("1")
+    # monitor = monitors.Monitor("MacBook Air 13.6 inch", width=30.41, distance=60)
+    # monitor.setSizePix([2560, 1664])
+    participant_id = "01"
+    date_str = datetime.now().strftime("%Y%m%d")
+    experiment = Experiment(participant_id=participant_id)
     experiment.run(10)
-    experiment.save_csv("sterberg.csv")
+    experiment.save_csv(f"data/sub-{participant_id}_task-sternberg_{date_str}.csv")
     core.quit()
