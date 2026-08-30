@@ -5,7 +5,9 @@ My very first time writing computer-based psychology experiments using PsychoPy.
 ```text
 ├── src/
 │   ├── experiment.py  # Abstract class definition for experiments.
-├── sternberg.py       # Sternberg, 1966 experiment
+└── sternberg
+    ├── main.py        # Sternberg, 1966 task implementation
+    └── run.py         # Sample run for Sternberg Task 
 ```
 
 ## Papers

@@ -5,7 +5,7 @@ from os import path
 from datetime import datetime
 import csv
 
-from psychopy import monitors, visual, core
+from psychopy import monitors, visual
 from psychopy.hardware import keyboard
 
 
@@ -15,12 +15,15 @@ class Base:
 
     def __init__(self, monitor: None | monitors.Monitor = None,
                  window_size: tuple[int, int] = (800, 600),
-                 window_color: tuple[int, int, int] =(-1, -1, -1)):
+                 window_color: tuple[int, int, int] = (-1, -1, -1),
+                 window_fullscr: bool = False):
         self.win = visual.Window(
             monitor=monitor,
             size=window_size,
-            color=window_color
+            color=window_color,
+            fullscr=window_fullscr
         )
+        # TODO: can specify monitor object
         self.frame_rate = self.win.getActualFrameRate() or 60.0
         self.kb = keyboard.Keyboard()
         self.text_center = visual.TextStim(self.win, "", color=(1, 1, 1))
@@ -54,6 +57,9 @@ class Base:
     def fixation(self, dur: float, cross: str = "+"):
         self.present_for(cross, dur)
 
+    def mask(self, dur: float, mask: str = "#####"):
+        self.present_for(mask, dur)
+
     def show_stimulus(self, stimulus: str, dur: float):
         self.present_for(stimulus, dur)
 
@@ -63,7 +69,11 @@ class Base:
     def waiting_start(self):
         self.kb.clearEvents()
         self.present("Press SPACE to start")
-        self.kb.waitKeys(keyList=["space"], waitRelease=False)[0]
+        key = self.kb.waitKeys(keyList=["space", self.QUIT_KEY], waitRelease=False)[0]
+        if key.name == self.QUIT_KEY:
+            self.abort_requested = True
+            return -1
+        return 0
 
     def run(self, *args, **kwargs) -> Any:
         raise NotImplementedError()

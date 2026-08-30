@@ -9,16 +9,13 @@ import random
 import traceback
 from dataclasses import dataclass
 
-from psychopy import monitors, visual, core
-from psychopy.hardware import keyboard
-
 from src.experiment import Base
 
 
 DIGITS = list("0123456789")
 Response = Literal["j", "f"]
 
-class Experiment(Base):
+class Sternberg(Base):
 
     MIN_SET_SIZE = 1
     MAX_SET_SIZE = 6
@@ -89,8 +86,8 @@ class Experiment(Base):
             return key
 
     def run_trial(self, trial: "Trial"):
-        self.fixation(dur=1.0)
-        self.show_stimulus(trial.memory_set, dur=1.2)
+        self.fixation(dur=0.5)
+        self.show_stimulus(trial.memory_set, dur=1.0)
         self.delay(dur=2.0)
         key = self.show_probe(trial.probe)
         is_correct = trial.correct_response == key.name
@@ -102,7 +99,7 @@ class Experiment(Base):
         return TrialResult(
             trial=trial,
             response=response,
-            response_time=round(key.rt, 3),
+            reaction_time=round(key.rt, 3),
             is_correct=(response == trial.correct_response)
         )
 
@@ -110,19 +107,21 @@ class Experiment(Base):
         self.results: list[TrialResult] = []
         try:
             self.trials = self.generate_trials(n)
-            self.waiting_start()
-            self.delay(dur=1.0)
-            for trial in self.trials:
-                result = self.run_trial(trial)
-                self.results.append(result)
-                self.check_quit()
-                if self.abort_requested:
-                    break
+            aborted = self.waiting_start()
+            if not aborted:
+                self.delay(dur=1.0)
+                for trial in self.trials:
+                    # NOTE: one trial lasts for approximately 6.0 seconds
+                    result = self.run_trial(trial)
+                    self.results.append(result)
+                    self.check_quit()
+                    if self.abort_requested:
+                        break
+                    self.delay(dur=0.5)
         except Exception:
             traceback.print_exc()
         finally:
             self.win.close()
-
 
 @dataclass
 class Trial:
@@ -131,20 +130,9 @@ class Trial:
     probe:            str
     correct_response: Response
 
-
 @dataclass
 class TrialResult:
     trial:         Trial
     response:      Response
-    response_time: float
+    reaction_time: float
     is_correct:    bool
-
-
-if __name__ == "__main__":
-    # monitor = monitors.Monitor("MacBook Air 13.6 inch", width=30.41, distance=60)
-    # monitor.setSizePix([2560, 1664])
-    # TODO: add units="deg" in monitor
-    experiment = Experiment()
-    experiment.run(10)
-    experiment.save_csv(participant_id="01", session_id=1, task_name="sternberg")
-    core.quit()
