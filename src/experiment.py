@@ -5,7 +5,7 @@ from os import path
 from datetime import datetime
 import csv
 
-from psychopy import monitors, visual, sound
+from psychopy import monitors, visual, sound, prefs
 from psychopy.hardware import keyboard
 
 
@@ -92,15 +92,17 @@ class Base:
         """
         self.present_for(stimulus, dur)
 
-    def play_audio(self, audio_path: str, text: str, dur: float):
+    def play_audio(self, audio_path: str):
         """
-        Play audio file and present textual stimulus for given duration.
+        Start playing audio file (in the background). Return audio duration.
         """
         if not isinstance(audio_path, str): raise TypeError()
 
+        prefs.hardware["audioLib"] = ["sounddevice"] # type: ignore
         aud_stim = sound.Sound(audio_path)
+        aud_dur = aud_stim.getDuration()
         aud_stim.play()
-        self.present_for(text, dur)
+        return aud_dur
 
     def delay(self, dur: float):
         """
