@@ -1,7 +1,7 @@
 """
-Experiment 1 from Sternberg, 1966.
+Sternberg Task implementation.
 
-Sternberg, S. (1966). High-speed scanning in human memory. Science, 153(3736), 652–654
+Sternberg, S. (1966). High-speed scanning in human memory. Science, 153(3736), 652–654.
 """
 
 from typing import Final, Literal
@@ -14,12 +14,14 @@ from src.experiment import Base
 
 DIGITS = list("0123456789")
 Response = Literal["j", "f"]
+
 @dataclass
 class Trial:
     set_size:         int
     memory_set:       str
     probe:            str
     correct_response: Response
+
 
 @dataclass
 class TrialResult:
@@ -28,23 +30,33 @@ class TrialResult:
     reaction_time: float
     is_correct:    bool
 
+
 class Sternberg(Base):
 
     MIN_SET_SIZE = 1
     MAX_SET_SIZE = 6
     YES: Final[Response] = "j"
-    NO: Final[Response] = "f"
+    NO:  Final[Response] = "f"
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize Sternberg Task.
+        """
         super().__init__(*args, **kwargs)
         self.text_main.height = 0.12
 
     def generate_trial(self, set_size: None | int = None):
-        """generate a single trial with random set size if not specified"""
-
-        # generate memory set
-        if set_size is None:
+        """
+        Generate a single trial with given set size, random size if not specified.
+        Return trial.
+        """
+        if not (isinstance(set_size, int) or set_size is None): raise TypeError()
+        if set_size is not None:
+            if self.MIN_SET_SIZE > set_size or self.MAX_SET_SIZE < set_size: raise ValueError()
+        else:
             set_size  = random.randint(self.MIN_SET_SIZE, self.MAX_SET_SIZE)
+        
+        # generate memory set
         negatives = list(DIGITS)
         positives = []
         for _ in range(set_size):
@@ -68,20 +80,25 @@ class Sternberg(Base):
             correct_response=correct_response
         )
     
-    def generate_trials(self, n: int):
-        """generate n many trials where each set size has equal trials if possible"""
+    def generate_trials(self, n_trials: int):
+        """
+        Generate n trials in total, with an equal number from each set size.
+        Return list of trials.
+        """
+        if not isinstance(n_trials, int): raise TypeError()
+        if n_trials < 1: raise TypeError()
 
-        # generate for each length
+        # generate for divisible set size
         trials: list[Trial] = []
-        if n >= self.MAX_SET_SIZE:
-            m = n//self.MAX_SET_SIZE
+        if n_trials >= self.MAX_SET_SIZE:
+            m = n_trials//self.MAX_SET_SIZE
             for i in range(self.MIN_SET_SIZE, self.MAX_SET_SIZE+1):
                 for _ in range(m):
                     trial = self.generate_trial(i)
                     trials.append(trial)
 
         # generate for remaning size
-        rem = n%self.MAX_SET_SIZE
+        rem = n_trials%self.MAX_SET_SIZE
         for _ in range(rem):
             trial = self.generate_trial() # with random set size
             trials.append(trial)
@@ -90,6 +107,11 @@ class Sternberg(Base):
         return trials
     
     def show_probe(self, probe: str):
+        """
+        Present probe and wait for response. Return key object.
+        """
+        if not isinstance(probe, str): raise TypeError()
+
         self.present(probe, self.kb.clock.reset)
         while True:
             key = self.kb.waitKeys(keyList=[self.YES, self.NO, self.QUIT_KEY], waitRelease=False)[0]
@@ -99,16 +121,21 @@ class Sternberg(Base):
             return key
 
     def run_trial(self, trial: Trial):
+        """
+        Run a single trial. Return trial result.
+        """
+        if not isinstance(trial, Trial): raise TypeError()
+
         self.fixation(dur=0.5)
         self.show_stimulus(trial.memory_set, dur=1.0)
         self.delay(dur=2.0)
         key = self.show_probe(trial.probe)
-        is_correct = trial.correct_response == key.name
-        if is_correct:
-            self.show_stimulus("Correct", dur=0.5)
-        else:
-            self.show_stimulus("Incorrect", dur=0.5)
         response = key.name
+        is_correct = trial.correct_response == response
+
+        feedback = "Correct" if is_correct else "Incorrect"
+        self.show_stimulus(feedback, dur=0.5)
+
         return TrialResult(
             trial=trial,
             response=response,
@@ -116,22 +143,34 @@ class Sternberg(Base):
             is_correct=(response == trial.correct_response)
         )
 
-    def run(self, n: int):
+    def run(self, n_trials: int):
+        """
+        Generate n trials and run all trials.
+        """
+        if not isinstance(n_trials, int): raise TypeError()
+        if n_trials < 1: raise TypeError()
         self.results: list[TrialResult] = []
+
         try:
-            self.trials = self.generate_trials(n)
+            # generate trials
+            self.trials = self.generate_trials(n_trials)
+            # show waiting screen
             aborted = self.waiting_start()
+
+            # start task if not quited
             if not aborted:
                 self.delay(dur=1.0)
                 for trial in self.trials:
-                    # NOTE: one trial lasts for approximately 6.0 seconds
+                    # run individual trials and save results 
                     result = self.run_trial(trial)
                     self.results.append(result)
+                    # end task if quited
                     self.check_quit()
-                    if self.abort_requested:
-                        break
+                    if self.abort_requested: break
                     self.delay(dur=0.5)
+
         except Exception:
             traceback.print_exc()
+
         finally:
             self.win.close()
