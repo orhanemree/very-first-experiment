@@ -1,18 +1,25 @@
 # Very First Experiment
-My very first time writing computer-based psychology experiments using PsychoPy.
+My very first time writing computer-based psychology experiments using `PsychoPy`.
 
-## Project Structure
-```text
-├── src/
-│   ├── experiment.py  # Abstract class definition for experiments.
-└── sternberg
-    ├── main.py        # Sternberg, 1966 task implementation
-    └── run.py         # Sample run for Sternberg Task 
+## Quick Start
+`PsychoPy` is not compatible with the latest `Python` version. I used `Python=3.10` and `PsychoPy=2026.2.1` versions.
+* Clone repository and set up specified environment. Then:
+```bash
+cd very-first-experiment
+pip install psychopy==2026.2.1
+```
+* Run files as a module. For example to run sample Sternberg Task:
+```bash
+python3.10 -m sternberg.run
 ```
 
+## Tasks Implemented
+Each task has its own folder consisting of README, implementation (i.e., `main.py`) and sample runs (e.g., `run.py`). See READMEs for task details and sample results.
+- [x] [Sternberg](/sternberg/README.md): working memory
+- [ ] Auditory n-back: working memory update
+
 ## Papers
-Papers that inspired these experiments.
-* Sternberg, S. (1966). High-speed scanning in human memory. *Science*, *153*(3736), 652–654.
+Papers that inspired these experiments are listed in each task's README.
 
 ## License
 MIT
