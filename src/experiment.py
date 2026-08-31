@@ -5,7 +5,7 @@ from os import path
 from datetime import datetime
 import csv
 
-from psychopy import monitors, visual, sound, prefs
+from psychopy import core, monitors, visual, sound, prefs
 from psychopy.hardware import keyboard
 
 
@@ -15,6 +15,9 @@ class Base:
 
     def __init__(self, window: None | visual.Window = None,
                  monitor: None | monitors.Monitor = None):
+        """
+        Initialize PsychoPy app.
+        """
         if not (isinstance(window, visual.Window) or window is None): raise TypeError()
         if not (isinstance(monitor, monitors.Monitor) or monitor is None): raise TypeError()
 
@@ -57,6 +60,7 @@ class Base:
         """
         if not isinstance(text, str): raise TypeError()
         if not isinstance(dur, float): raise TypeError()
+        if dur < 0.0: raise ValueError()
 
         n_frames = int(round(dur * self.frame_rate))
         self.text_main.text = text
@@ -143,7 +147,7 @@ class Base:
     def save_csv(self, participant_id: str, session_id: int, task_name: str,
                  out_dir: str = "data"):
         """
-        Write task results into given csv file. Return createde filename.
+        Write task results into given csv file. Return created filename.
         """
         if not self.results: return
 
@@ -165,3 +169,9 @@ class Base:
                 writer.writerow(row)
 
         return filename
+
+    def terminate(self):
+        """
+        Terminate PsychoPy app.
+        """
+        core.quit()
