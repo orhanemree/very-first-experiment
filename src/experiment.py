@@ -5,7 +5,7 @@ from os import path
 from datetime import datetime
 import csv
 
-from psychopy import monitors, visual
+from psychopy import monitors, visual, sound
 from psychopy.hardware import keyboard
 
 
@@ -13,60 +13,106 @@ class Base:
 
     QUIT_KEY = "q"
 
-    def __init__(self, monitor: None | monitors.Monitor = None,
-                 window_size: tuple[int, int] = (800, 600),
-                 window_color: tuple[int, int, int] = (-1, -1, -1),
-                 window_fullscr: bool = False):
-        self.win = visual.Window(
+    def __init__(self, window: None | visual.Window = None,
+                 monitor: None | monitors.Monitor = None):
+        if not (isinstance(window, visual.Window) or window is None): raise TypeError()
+        if not (isinstance(monitor, monitors.Monitor) or monitor is None): raise TypeError()
+
+        # PsychoPy objects
+        if window is None:
+            window = visual.Window(
             monitor=monitor,
-            size=window_size,
-            color=window_color,
-            fullscr=window_fullscr
+            size=(800, 600),
+            color=(-1, -1, -1),
+            fullscr=False
         )
-        # TODO: can specify monitor object
+        self.win = window
         self.frame_rate = self.win.getActualFrameRate() or 60.0
         self.kb = keyboard.Keyboard()
-        self.text_center = visual.TextStim(self.win, "", color=(1, 1, 1))
+        self.text_main = visual.TextStim(self.win, "", color=(1, 1, 1))
 
+        # task objects
         self.trials  = []
         self.results = []
         self.abort_requested: bool = False
 
     def present(self, text: str, callOnFlip: None | Callable = None):
-        self.text_center.text = text
-        self.text_center.draw()
+        """
+        Draw text on screen. 
+        (Stimulus is shown until it is overwritten.)
+        """
+        if not isinstance(text, str): raise TypeError()
+        if not (isinstance(callOnFlip, Callable) or callOnFlip is None): raise TypeError()
+
+        self.text_main.text = text
+        self.text_main.draw()
         if callOnFlip:
             self.win.callOnFlip(callOnFlip)
         self.win.flip()
 
     def present_for(self, text: str, dur: float):
+        """
+        Draw text on screen and sleep for given duration.
+        (Stimulus is shown for given duration.)
+        """
+        if not isinstance(text, str): raise TypeError()
+        if not isinstance(dur, float): raise TypeError()
+
         n_frames = int(round(dur * self.frame_rate))
-        self.text_center.text = text
+        self.text_main.text = text
         for _ in range(n_frames):
-            self.text_center.draw()
+            self.text_main.draw()
             self.win.flip()
             self.check_quit()
 
     def check_quit(self):
+        """
+        Check if quit key pressed during any frame.
+        This does not immediately abort task.
+        Check abort_requested in run() to handle abort safely.
+        """
         if self.kb.getKeys([self.QUIT_KEY], waitRelease=False):
             self.abort_requested = True
-            # NOTE: this does not immediately abort,
-            # check abort_requested in run() function
-            # in order not to abort during a trial
 
     def fixation(self, dur: float, cross: str = "+"):
+        """
+        Present fixation for given duration, + by default.
+        """
         self.present_for(cross, dur)
 
     def mask(self, dur: float, mask: str = "#####"):
+        """
+        Present mask for given duration, ##### by default.
+        """
         self.present_for(mask, dur)
 
     def show_stimulus(self, stimulus: str, dur: float):
+        """
+        Present textual stimulus for given duration by default.
+        """
         self.present_for(stimulus, dur)
 
+    def play_audio(self, audio_path: str, text: str, dur: float):
+        """
+        Play audio file and present textual stimulus for given duration.
+        """
+        if not isinstance(audio_path, str): raise TypeError()
+
+        aud_stim = sound.Sound(audio_path)
+        aud_stim.play()
+        self.present_for(text, dur)
+
     def delay(self, dur: float):
+        """
+        Sleep for given duration.
+        """
         self.present_for("", dur)
     
     def waiting_start(self):
+        """
+        Present default start screen, waiting for SPACE press.
+        Return -1 if quit key pressed, return 0 if SPACE pressed.
+        """
         self.kb.clearEvents()
         self.present("Press SPACE to start")
         key = self.kb.waitKeys(keyList=["space", self.QUIT_KEY], waitRelease=False)[0]
@@ -79,7 +125,10 @@ class Base:
         raise NotImplementedError()
 
     def _flatten_result(self, result):
-        """Flatten a trial result to write into csv file, called from save_csv()"""
+        """
+        Flatten a trial result to write into csv file.
+        Is not to be called directly, called from save_csv().
+        """
         d = asdict(result)
         flat = {}
         for key, value in d.items():
@@ -91,8 +140,11 @@ class Base:
 
     def save_csv(self, participant_id: str, session_id: int, task_name: str,
                  out_dir: str = "data"):
-        if not self.results:
-            return
+        """
+        Write task results into given csv file. Return createde filename.
+        """
+        if not self.results: return
+
         date_str = datetime.now().strftime("%Y%m%d")
         filename = f"{out_dir}/sub-{participant_id}_ses-{session_id:02d}_task-{task_name}_{date_str}.csv"
         rows = [self._flatten_result(r) for r in self.results]

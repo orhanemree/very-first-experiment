@@ -14,6 +14,19 @@ from src.experiment import Base
 
 DIGITS = list("0123456789")
 Response = Literal["j", "f"]
+@dataclass
+class Trial:
+    set_size:         int
+    memory_set:       str
+    probe:            str
+    correct_response: Response
+
+@dataclass
+class TrialResult:
+    trial:         Trial
+    response:      Response
+    reaction_time: float
+    is_correct:    bool
 
 class Sternberg(Base):
 
@@ -24,7 +37,7 @@ class Sternberg(Base):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.text_center.height = 0.12
+        self.text_main.height = 0.12
 
     def generate_trial(self, set_size: None | int = None):
         """generate a single trial with random set size if not specified"""
@@ -85,7 +98,7 @@ class Sternberg(Base):
                 continue
             return key
 
-    def run_trial(self, trial: "Trial"):
+    def run_trial(self, trial: Trial):
         self.fixation(dur=0.5)
         self.show_stimulus(trial.memory_set, dur=1.0)
         self.delay(dur=2.0)
@@ -122,17 +135,3 @@ class Sternberg(Base):
             traceback.print_exc()
         finally:
             self.win.close()
-
-@dataclass
-class Trial:
-    set_size:         int
-    memory_set:       str
-    probe:            str
-    correct_response: Response
-
-@dataclass
-class TrialResult:
-    trial:         Trial
-    response:      Response
-    reaction_time: float
-    is_correct:    bool
