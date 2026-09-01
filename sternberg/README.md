@@ -13,12 +13,12 @@ Two main findings of the original experiment are (1) RT increases linearly with 
 ### Quick Start
 See quick start in [main README](/README.md) first.
 ```bash
-cd very-first-experiment # make sure you are in the root
-python3.10 -m sternberg.run # run sample task
+$ cd very-first-experiment # make sure you are in the root
+$ python3.10 -m sternberg.sample # run sample file as a module
 ```
 
 ### Sample Results
-I ran sample task myself for 300 trials. Then I ran a simple analysis and despite the small sample size, was able to see both classical trends. (Though I didn't conduct significance test.) See Figures 2-3.
+I ran sample task myself for 300 trials. Then I ran a simple analysis and despite the small sample size, was able to see both classical trends. (Though I didn't run significance test.) See Figures 2-3.
 
 <img src="fig/Figure_2.png" alt="Sternberg Task RT as a function of set size." width="400">
 
