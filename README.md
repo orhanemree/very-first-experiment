@@ -2,19 +2,25 @@
 My very first time writing computer-based psychology experiments using `PsychoPy`.
 
 ## Quick Start
-`PsychoPy` is not compatible with the latest `Python` version. I used `Python=3.10` and `PsychoPy=2026.2.1` versions.
-* Clone repository and set up specified environment. Then:
+Since `PsychoPy` is not compatible with the latest `Python` version, I used `Python=3.10` and `PsychoPy=2026.2.1` versions.
+* Clone repository.
 ```bash
-cd very-first-experiment
-pip install psychopy==2026.2.1
+$ git clone https://github.com/orhanemree/very-first-experiment.git
+$ cd very-first-experiment
 ```
-* Run files as a module. For example to run sample Sternberg Task:
+* Create specified virtual environment and install `PsychoPy`.
 ```bash
-python3.10 -m sternberg.run
+$ python3.10 -m venv .venv
+$ source .venv/bin/activate # activate venv depending on your OS
+$ pip install psychopy==2026.2.1
+```
+* You can now run a sample task. Run a file as a module. For example, run Sternberg sample:
+```bash
+$ python3.10 -m sternberg.sample
 ```
 
 ## Tasks Implemented
-Each task has its own folder consisting of README, implementation (i.e., `main.py`) and sample runs (e.g., `run.py`). See READMEs for task details and sample results.
+Each task has its own folder consisting of README, implementation (`main.py`) and sample run files. See READMEs for task details and sample results.
 - [x] [Sternberg](/sternberg/README.md): working memory
 - [ ] Auditory n-back: working memory update
 
