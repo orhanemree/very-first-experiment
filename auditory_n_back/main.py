@@ -78,7 +78,7 @@ class Audio_N_Back(Base):
                 # first n_back trials are non-target
                 trials.append(Trial(
                     trial_type="non-target",
-                    stimulus=random.randint(0, len_dataset),
+                    stimulus=random.randint(0, len_dataset-1),
                     correct_response=self.ANY
                 ))
                 continue
