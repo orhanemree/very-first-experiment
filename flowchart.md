@@ -2,7 +2,7 @@
 Generate beautiful trial flowcharts for PsychoPy tasks.
 
 ### Quick Example
-* A flowchart consists of scenes. A scene is a Scene object which has three properties. First is a function that draw on PsychoPy window, which is a single stimulus (an image) in the task. Second is the name of the scene. Third is a short description will be shown below the image.
+* A flowchart consists of scenes. A scene is a Scene object which has three properties. First is a function that draws on PsychoPy window, which is a single stimulus (an image) in the task. Second is the name of the scene. Third is a short description which will be shown below the image.
 * Here is a simple example for Sternberg task:
 ```python
 # sternberg/flowchart.py
