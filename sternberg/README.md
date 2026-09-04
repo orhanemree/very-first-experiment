@@ -1,7 +1,7 @@
 ## Sternberg Task
 A working memory task implementation based on Sternberg (1966). On each trial, participants see a sequence of digits (0-9, length 1-6) for 1 second, followed by 2 seconds delay and probe digit. They are expected to press "j" if the sequence included the probe or to press "f" otherwise. Both reaction time (RT) and accuracy are recorded. See Figure 1.
 
-<img src="fig/Figure_1.jpg" alt="Sternberg Task trial flow." width="400">
+<img src="fig/Figure_1.png" alt="Sternberg Task trial flow." width="400">
 
 Figure 1. Trial flow.
 

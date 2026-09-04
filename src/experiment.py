@@ -23,6 +23,7 @@ class Base:
 
         # PsychoPy objects
         if window is None:
+            # create default window object if not specified
             window = visual.Window(
             monitor=monitor,
             size=(800, 600),
@@ -80,13 +81,13 @@ class Base:
 
     def fixation(self, dur: float, cross: str = "+"):
         """
-        Present fixation for given duration, + by default.
+        Present fixation (+ by default) for given duration.
         """
         self.present_for(cross, dur)
 
     def mask(self, dur: float, mask: str = "#####"):
         """
-        Present mask for given duration, ##### by default.
+        Present mask (##### by default) for given duration.
         """
         self.present_for(mask, dur)
 

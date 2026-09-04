@@ -21,7 +21,7 @@ dataset = [f'auditory_n_back/recordings/{r}.wav' for r in recordings]
 
 
 TrialType = Literal["target", "non-target"]
-Response = Literal["j", "f", "*"] # "*" meaning either "j" or "f"
+Response  = Literal["j", "f", "*"] # "*" meaning either "j" or "f"
 
 @dataclass
 class Trial:

@@ -1,5 +1,7 @@
 ## Auditory N-Back Task
-An implementation of an auditory working memory update task. On each trial participants hear a Turkish letter pronounced (see Material). They are expected to press "j" if it is the same letter that was played n trials earlier or to press "f" otherwise. The trials are self-paced. Both reaction time (RT) and accuracy are recorded.
+An implementation of an auditory working memory update task. On each trial participants hear a Turkish letter pronounced (see Material). They are expected to press "j" if it is the same letter that was played n trials earlier or to press "f" otherwise. The first n trials accept both keys as correct. The trials are self-paced with .5 second interval between response and the next trial. Both reaction time (RT) and accuracy are recorded. See Figure 1.
+
+<img src="fig/Figure_1.png" alt="Auditory N-Back Task trial flow." width="400">
 
 ### Background
 To be added.

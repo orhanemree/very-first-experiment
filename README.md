@@ -24,6 +24,9 @@ $ pip install psychopy==2026.2.1
 $ python3.10 -m sternberg.sample
 ```
 
+## Flowcharts
+I also wrote a custom class to generate trial flowcharts. [Learn more](/flowchart.md).
+
 ## Papers
 Papers that inspired these experiments are listed in each task's README.
 
