@@ -1,6 +1,11 @@
 # Very First Experiment
 My very first time writing computer-based psychology experiments using `PsychoPy`.
 
+## Tasks Implemented
+Each task has its own folder consisting of README, implementation (`main.py`) and sample run files. See READMEs for task details and sample results.
+- [x] [Sternberg](/sternberg/README.md): working memory
+- [x] [Auditory N-Back](/auditory_n_back/README.md): working memory update
+
 ## Quick Start
 Since `PsychoPy` is not compatible with the latest `Python` version, I used `Python=3.10` and `PsychoPy=2026.2.1` versions.
 * Clone repository.
@@ -18,11 +23,6 @@ $ pip install psychopy==2026.2.1
 ```bash
 $ python3.10 -m sternberg.sample
 ```
-
-## Tasks Implemented
-Each task has its own folder consisting of README, implementation (`main.py`) and sample run files. See READMEs for task details and sample results.
-- [x] [Sternberg](/sternberg/README.md): working memory
-- [ ] Auditory n-back: working memory update
 
 ## Papers
 Papers that inspired these experiments are listed in each task's README.

@@ -22,7 +22,7 @@ I ran sample task myself for 300 trials. Then I ran a simple analysis and despit
 
 <img src="fig/Figure_2.png" alt="Sternberg Task RT as a function of set size." width="400">
 
-Figure 2. RT as a function of set size (present trials only).
+Figure 2. RT as a function of set size.
 
 <img src="fig/Figure_3.png" alt="Sternberg Task present and absent trials sharing the same slope." width="400">
 
@@ -30,6 +30,3 @@ Figure 3. Present and absent trials sharing the same slope.
 
 ### References
 * Sternberg, S. (1966). High-speed scanning in human memory. *Science*, *153*(3736), 652–654.
-
-### License
-MIT
